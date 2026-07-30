@@ -1513,6 +1513,70 @@ body {
 }
 .day-cell.active .day-bar { opacity: 0.85; box-shadow: 0 0 0 1px rgba(255,254,249,0.4); }
 
+/* 日历格子 - 植物照片模式 */
+.day-cell.has-photo {
+  padding: 0;
+  overflow: hidden;
+  align-items: stretch;
+  justify-content: flex-start;
+  border-color: var(--border);
+}
+.day-cell.has-photo .day-num {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+  z-index: 2;
+  line-height: 1;
+}
+.day-cell.has-photo .day-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.day-cell.has-photo .day-emoji-bg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  background: var(--bg-card-alt);
+}
+.day-cell.has-photo .day-count {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  background: rgba(255,255,255,0.92);
+  color: var(--ink);
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  z-index: 2;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.day-cell.has-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 35%, transparent 55%, rgba(0,0,0,0.18) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+.day-cell.has-photo.today { border-color: var(--accent); border-width: 2px; }
+.day-cell.has-photo.selected { box-shadow: 0 0 0 2px var(--accent); }
+
 /* 图例 */
 .legend {
   display: flex;
@@ -9928,6 +9992,46 @@ body::-webkit-scrollbar-thumb:hover { background: var(--ink-cinnabar); }
     const typeTag = { water:'tag-water', plant:'tag-plant', repot:'tag-repot', pest:'tag-pest', death:'tag-death', fertilize:'tag-fertilize', divide:'tag-divide', merge:'tag-merge', enclosed:'tag-enclosed', outdoor:'tag-outdoor', mount:'tag-mount' };
     let selected = 8;
 
+    // 按植物名查找 plantsData（支持模糊匹配，延迟访问避免 TDZ）
+    function getPlantByName(name) {
+      if (!name) return null;
+      let data;
+      try { data = plantsData; } catch(e) { return null; }
+      if (!data) return null;
+      let p = data.find(p => p.name === name);
+      if (p) return p;
+      p = data.find(p => name.includes(p.name) || p.name.includes(name));
+      return p || null;
+    }
+
+    // 获取某天的植物照片/emoji
+    function getDayVisual(d) {
+      if (!events[d]) return null;
+      const dayEvents = events[d];
+      // 收集当天涉及的植物（去重）
+      const plantNames = [...new Set(dayEvents.map(e => e.plant))];
+      const plants = plantNames.map(n => getPlantByName(n)).filter(Boolean);
+      // 优先选有 photo 的
+      const withPhoto = plants.filter(p => p.photo);
+      const pool = withPhoto.length > 0 ? withPhoto : plants;
+      let pick;
+      if (pool.length > 0) {
+        pick = pool[Math.floor(Math.random() * pool.length)];
+      } else {
+        // 兜底：从所有有 photo 的植物中随机选
+        let all;
+        try { all = plantsData; } catch(e) { all = null; }
+        if (!all) return { photo: null, emoji: '🌿', count: dayEvents.length };
+        const allWithPhoto = all.filter(p => p.photo);
+        if (allWithPhoto.length > 0) {
+          pick = allWithPhoto[Math.floor(Math.random() * allWithPhoto.length)];
+        } else {
+          return { photo: null, emoji: '🌿', count: dayEvents.length };
+        }
+      }
+      return { photo: pick.photo || null, emoji: pick.emoji || '🌿', count: dayEvents.length };
+    }
+
     function renderCalendar() {
       const grid = document.getElementById('calGrid');
       let html = '<div class="day-cell dim">30</div>';
@@ -9935,21 +10039,47 @@ body::-webkit-scrollbar-thumb:hover { background: var(--ink-cinnabar); }
         let cls = 'day-cell';
         if (d === 8) cls += ' today';
         if (d === selected && d !== 8) cls += ' selected';
-        let dots = '';
+
         if (events[d]) {
           const types = [...new Set(events[d].map(e=>e.type))];
+          const visual = getDayVisual(d);
+
+          // 构建色条 HTML
+          let barHtml = '';
           if (types.length === 1) {
-            dots = `<div class="day-bar" style="background:var(${typeColorVar[types[0]]})"></div>`;
+            barHtml = `<div class="day-bar" style="background:var(${typeColorVar[types[0]]})"></div>`;
           } else {
             const stops = types.map((t,i) => {
               const s = (i * 100 / types.length).toFixed(1);
               const e = ((i + 1) * 100 / types.length).toFixed(1);
               return `var(${typeColorVar[t]}) ${s}% ${e}%`;
             });
-            dots = `<div class="day-bar" style="background:linear-gradient(to right, ${stops.join(',')})"></div>`;
+            barHtml = `<div class="day-bar" style="background:linear-gradient(to right, ${stops.join(',')})"></div>`;
           }
+
+          if (visual && visual.photo) {
+            // 照片模式
+            cls += ' has-photo';
+            html += `<div class="${cls}" onclick="selectDay(${d})">` +
+              `<span class="day-num">${d}</span>` +
+              `<img class="day-photo" src="${visual.photo}" alt="" loading="lazy">` +
+              `<span class="day-count">${visual.count}</span>` +
+              `</div>`;
+          } else if (visual) {
+            // emoji 模式
+            cls += ' has-photo';
+            html += `<div class="${cls}" onclick="selectDay(${d})">` +
+              `<span class="day-num">${d}</span>` +
+              `<div class="day-emoji-bg">${visual.emoji}</div>` +
+              `<span class="day-count">${visual.count}</span>` +
+              `</div>`;
+          } else {
+            // 普通模式
+            html += `<div class="${cls}" onclick="selectDay(${d})">${d}${barHtml}</div>`;
+          }
+        } else {
+          html += `<div class="${cls}" onclick="selectDay(${d})">${d}</div>`;
         }
-        html += `<div class="${cls}" onclick="selectDay(${d})">${d}${dots}</div>`;
       }
       for (let d = 1; d <= 3; d++) html += `<div class="day-cell dim">${d}</div>`;
       grid.innerHTML = html;
@@ -12065,14 +12195,14 @@ body::-webkit-scrollbar-thumb:hover { background: var(--ink-cinnabar); }
     }
 
     const plantsData = [
-      { name:'龟背竹', emoji:'🍃', variety:'Monstera deliciosa', water:'3天', light:'散射光', color:'#5B8C5A', days:120, family:'天南星科', type:'观叶' },
-      { name:'花烛红掌', emoji:'🌺', variety:'Anthurium andraeanum', water:'2天', light:'明亮光', color:'#E85D75', days:95, family:'天南星科', type:'观花' },
-      { name:'琴叶榕', emoji:'🌿', variety:'Ficus lyrata', water:'5天', light:'明亮光', color:'#4A8C6F', days:200, family:'桑科', type:'观叶' },
-      { name:'彩叶芋', emoji:'🎨', variety:'Caladium bicolor', water:'2天', light:'散射光', color:'#C77DFF', days:60, family:'天南星科', type:'观叶' },
-      { name:'空气凤梨', emoji:'🌬️', variety:'Tillandsia', water:'1天', light:'散射光', color:'#7EC8E3', days:180, family:'凤梨科', type:'观叶' },
-      { name:'鹿角蕨', emoji:'🦌', variety:'Platycerium', water:'3天', light:'散射光', color:'#6B8C5A', days:150, family:'水龙骨科', type:'蕨类' },
-      { name:'蝴蝶兰', emoji:'🦋', variety:'Phalaenopsis', water:'7天', light:'散射光', color:'#F2A7C3', days:300, family:'兰科', type:'观花' },
-      { name:'秋海棠', emoji:'🌸', variety:'Begonia', water:'2天', light:'散射光', color:'#FF6B8A', days:80, family:'秋海棠科', type:'观花' },
+      { name:'龟背竹', emoji:'🍃', photo:'plant-photos/rubber-plant.jpg', variety:'Monstera deliciosa', water:'3天', light:'散射光', color:'#5B8C5A', days:120, family:'天南星科', type:'观叶' },
+      { name:'花烛红掌', emoji:'🌺', photo:'plant-photos/peace-lily.jpg', variety:'Anthurium andraeanum', water:'2天', light:'明亮光', color:'#E85D75', days:95, family:'天南星科', type:'观花' },
+      { name:'琴叶榕', emoji:'🌿', photo:'plant-photos/dragon-tree.jpg', variety:'Ficus lyrata', water:'5天', light:'明亮光', color:'#4A8C6F', days:200, family:'桑科', type:'观叶' },
+      { name:'彩叶芋', emoji:'🎨', photo:'plant-photos/calathea.jpg', variety:'Caladium bicolor', water:'2天', light:'散射光', color:'#C77DFF', days:60, family:'天南星科', type:'观叶' },
+      { name:'空气凤梨', emoji:'🌬️', photo:'plant-photos/zz-plant.jpg', variety:'Tillandsia', water:'1天', light:'散射光', color:'#7EC8E3', days:180, family:'凤梨科', type:'观叶' },
+      { name:'鹿角蕨', emoji:'🦌', photo:'plant-photos/birds-nest-fern.jpg', variety:'Platycerium', water:'3天', light:'散射光', color:'#6B8C5A', days:150, family:'水龙骨科', type:'蕨类' },
+      { name:'蝴蝶兰', emoji:'🦋', photo:'plant-photos/snake-plant.jpg', variety:'Phalaenopsis', water:'7天', light:'散射光', color:'#F2A7C3', days:300, family:'兰科', type:'观花' },
+      { name:'秋海棠', emoji:'🌸', photo:'plant-photos/pothos.jpg', variety:'Begonia', water:'2天', light:'散射光', color:'#FF6B8A', days:80, family:'秋海棠科', type:'观花' },
       { name:'绿萝', emoji:'🌱', photo:'plant-photos/pothos.jpg', variety:'Epipremnum aureum', water:'3天', light:'散射光', color:'#4CAF50', days:90, family:'天南星科', type:'观叶' },
       { name:'白掌', emoji:'🤍', photo:'plant-photos/peace-lily.jpg', variety:'Spathiphyllum', water:'2天', light:'散射光', color:'#E8F5E9', days:110, family:'天南星科', type:'观花' },
       { name:'橡皮树', emoji:'🪴', photo:'plant-photos/rubber-plant.jpg', variety:'Ficus elastica', water:'5天', light:'明亮光', color:'#2E5C3E', days:250, family:'桑科', type:'观叶' },
