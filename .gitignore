@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+._*
+
+# TRAE 工作目录与 skill 资源（非项目代码）
+.trae-html-share-packages/
+skills/
+
+# 测试与临时文件
+test-*.html
+v4-temp*.html
+v4-shot*.html
+app.html
+index.html
+
+# 截图目录（体积大，非源码）
+screenshots/
+
+# 对话恢复与分析页（非项目交付物）
+conversation-recovery/
+plant-app-ia-analysis/
+
+# 原型预览打包
+原型预览/
+
+# Node
+node_modules/
