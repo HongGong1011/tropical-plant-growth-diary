@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>热带植物成长记 · 三风格对比预览</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #1c1c1e;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .compare-container {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* ======== Panel ======== */
+    .compare-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 280px;
+      position: relative;
+    }
+
+    .panel-header {
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      border-bottom: 1px solid;
+    }
+
+    /* Panel 1 — 温暖手账风 */
+    .panel-header.warm {
+      background: linear-gradient(135deg, #F7F2E9 0%, #EFE7DB 100%);
+      border-bottom-color: #D8CEC0;
+    }
+    .panel-label.warm { color: #6A8E6A; }
+    .panel-badge.warm { background: #E2F0E5; color: #6A8E6A; }
+
+    /* Panel 2 — 美式拼贴撕纸风 */
+    .panel-header.amer {
+      background: linear-gradient(135deg, #E8DDD2 0%, #D4C8B8 100%);
+      border-bottom-color: #C4B5A0;
+    }
+    .panel-label.amer { color: #1B365D; }
+    .panel-badge.amer {
+      background: #E8D9C4; color: #1B365D;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* Panel 3 — Vision Pro */
+    .panel-header.vision {
+      background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%);
+      border-bottom-color: rgba(0,0,0,0.08);
+    }
+    .panel-label.vision { color: #1d1d1f; }
+    .panel-badge.vision {
+      background: rgba(0,113,227,0.08); color: #0071e3;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+    }
+
+    .panel-label {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .panel-badge {
+      font-size: 10px;
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .panel-iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+    }
+    .panel-iframe.warm-bg { background: #F7F2E9; }
+    .panel-iframe.amer-bg { background: #E8DDD2; }
+    .panel-iframe.vision-bg { background: #f5f5f7; }
+
+    /* ======== Splitter ======== */
+    .splitter {
+      width: 4px;
+      background: rgba(255,255,255,0.12);
+      cursor: col-resize;
+      flex-shrink: 0;
+      position: relative;
+      transition: background 0.15s;
+      z-index: 10;
+    }
+    .splitter:hover,
+    .splitter.active {
+      background: rgba(0,113,227,0.6);
+    }
+    .splitter::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 2px;
+      height: 28px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 1px;
+    }
+
+    /* ======== Top Bar ======== */
+    .toolbar {
+      position: fixed;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      display: flex;
+      gap: 6px;
+      background: rgba(28,28,30,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 5px;
+    }
+    .toolbar-btn {
+      padding: 6px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      border: none;
+      color: rgba(255,255,255,0.6);
+      background: transparent;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      letter-spacing: 0.3px;
+      font-family: inherit;
+    }
+    .toolbar-btn:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.08); }
+    .toolbar-btn.active { color: #fff; background: rgba(0,113,227,0.5); }
+    .toolbar-divider {
+      width: 1px;
+      background: rgba(255,255,255,0.12);
+      margin: 2px 2px;
+    }
+
+    /* ======== Responsive ======== */
+    @media (max-width: 1100px) {
+      .compare-container { flex-direction: column; }
+      .compare-panel { flex: 1; }
+      .splitter {
+        width: 100%;
+        height: 4px;
+        cursor: row-resize;
+      }
+      .splitter::after {
+        width: 28px;
+        height: 2px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar" id="toolbar">
+    <button class="toolbar-btn active" onclick="showAll()">三栏并排</button>
+    <button class="toolbar-btn" onclick="focusPanel('warm')">温暖手账</button>
+    <button class="toolbar-btn" onclick="focusPanel('amer')">美式拼贴</button>
+    <button class="toolbar-btn" onclick="focusPanel('vision')">Vision Pro</button>
+    <span class="toolbar-divider"></span>
+    <button class="toolbar-btn" onclick="resetLayout()">重置布局</button>
+  </div>
+
+  <div class="compare-container" id="container">
+    <!-- 温暖手账风 -->
+    <div class="compare-panel" id="panelWarm" style="flex: 1;">
+      <div class="panel-header warm">
+        <span class="panel-label warm">01 · 温暖手账拼贴风</span>
+        <span class="panel-badge warm">奶油纸感 · 手绘贴纸</span>
+      </div>
+      <iframe class="panel-iframe warm-bg" src="./热带植物成长记_温暖手账风.html" id="iframeWarm"></iframe>
+    </div>
+
+    <div class="splitter" id="splitter1"></div>
+
+    <!-- 美式拼贴撕纸风 -->
+    <div class="compare-panel" id="panelAmer" style="flex: 1;">
+      <div class="panel-header amer">
+        <span class="panel-label amer">02 · 美式拼贴撕纸风</span>
+        <span class="panel-badge amer">牛皮纸色 · 打字机字体</span>
+      </div>
+      <iframe class="panel-iframe amer-bg" src="./热带植物成长记_美式拼贴撕纸风.html" id="iframeAmer"></iframe>
+    </div>
+
+    <div class="splitter" id="splitter2"></div>
+
+    <!-- Vision Pro -->
+    <div class="compare-panel" id="panelVision" style="flex: 1;">
+      <div class="panel-header vision">
+        <span class="panel-label vision">03 · Apple Vision Pro</span>
+        <span class="panel-badge vision">玻璃质感 · 清新亮色</span>
+      </div>
+      <iframe class="panel-iframe vision-bg" src="./热带植物成长记_VisionPro风格.html" id="iframeVision"></iframe>
+    </div>
+  </div>
+
+  <script>
+    const container = document.getElementById('container');
+    const panelWarm = document.getElementById('panelWarm');
+    const panelAmer = document.getElementById('panelAmer');
+    const panelVision = document.getElementById('panelVision');
+    const splitter1 = document.getElementById('splitter1');
+    const splitter2 = document.getElementById('splitter2');
+    const toolbarBtns = document.querySelectorAll('.toolbar-btn');
+
+    // ======== Splitter dragging ========
+    function initSplitter(splitter, panelA, panelB) {
+      let isDragging = false;
+
+      splitter.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        splitter.classList.add('active');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const rect = container.getBoundingClientRect();
+        const isVertical = window.innerWidth <= 1100;
+
+        if (isVertical) {
+          const y = e.clientY - rect.top;
+          const totalH = rect.height;
+          const splitterH = 4;
+          const minH = 100;
+          const pos = Math.max(minH, Math.min(totalH - minH - splitterH, y));
+          panelA.style.flex = 'none';
+          panelA.style.height = pos + 'px';
+          panelB.style.flex = '1';
+        } else {
+          const x = e.clientX - rect.left;
+          const totalW = rect.width;
+          const splitterW = 4;
+          const minW = 200;
+          const pos = Math.max(minW, Math.min(totalW - minW - splitterW, x));
+          const leftW = pos - panelA.getBoundingClientRect().left + container.getBoundingClientRect().left;
+          panelA.style.flex = 'none';
+          panelA.style.width = leftW + 'px';
+          panelB.style.flex = '1';
+        }
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        splitter.classList.remove('active');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      });
+    }
+
+    initSplitter(splitter1, panelWarm, panelAmer);
+    initSplitter(splitter2, panelAmer, panelVision);
+
+    // ======== Focus / Show All ========
+    function showAll() {
+      [panelWarm, panelAmer, panelVision].forEach(p => {
+        p.style.display = 'flex';
+        p.style.flex = '1';
+        p.style.width = '';
+        p.style.height = '';
+      });
+      splitter1.style.display = '';
+      splitter2.style.display = '';
+      updateToolbar('all');
+    }
+
+    function focusPanel(style) {
+      const panels = { warm: panelWarm, amer: panelAmer, vision: panelVision };
+      const target = panels[style];
+
+      Object.values(panels).forEach(p => {
+        p.style.display = 'none';
+        p.style.flex = '';
+        p.style.width = '';
+        p.style.height = '';
+      });
+      target.style.display = 'flex';
+      target.style.flex = '1';
+      splitter1.style.display = 'none';
+      splitter2.style.display = 'none';
+      updateToolbar(style);
+    }
+
+    function resetLayout() {
+      [panelWarm, panelAmer, panelVision].forEach(p => {
+        p.style.display = 'flex';
+        p.style.flex = '1';
+        p.style.width = '';
+        p.style.height = '';
+      });
+      splitter1.style.display = '';
+      splitter2.style.display = '';
+      updateToolbar('all');
+    }
+
+    function updateToolbar(active) {
+      toolbarBtns.forEach(b => b.classList.remove('active'));
+      const map = { all: 0, warm: 1, amer: 2, vision: 3 };
+      toolbarBtns[map[active]].classList.add('active');
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '1') focusPanel('warm');
+      if (e.key === '2') focusPanel('amer');
+      if (e.key === '3') focusPanel('vision');
+      if (e.key === '0') showAll();
+      if (e.key === 'Escape') resetLayout();
+    });
+  </script>
+</body>
+</html>
