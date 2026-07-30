@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>陪你长大 · 治愈信笺风 UI 原型</title>
+  <title>根系共生 · 治愈信笺风 UI 原型</title>
 <style>
 /* ============================================================
    治愈信笺风 CSS - 适配美式拼贴撕纸风 HTML 类名
@@ -661,73 +661,168 @@ body {
 
 .plant-name-tag { display: none; }
 
-/* ---------- 资产库 (邮票式三栏布局) ---------- */
+/* ---------- 资产库 (信笺式主次布局) ---------- */
 .asset-library {
   display: flex;
-  align-items: center;
-  justify-content: space-around;
-  padding: 14px 12px;
+  gap: 10px;
   margin: 0 0 14px;
+  position: relative;
+}
+
+/* 主统计卡 — 总植物数 */
+.asset-hero {
+  flex: 1.5;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
+  padding: 14px 14px 12px;
   position: relative;
   box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 124px;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
+.asset-hero:active { transform: scale(0.985); }
 
-.asset-library::before {
-  content: "";
+/* 邮戳环装饰 */
+.asset-hero::before {
+  content: '';
   position: absolute;
-  top: -4px; left: 8px; right: 8px;
-  height: 8px;
-  background:
-    radial-gradient(circle at 20px 4px, transparent 3.5px, var(--bg-paper) 3.5px),
-    radial-gradient(circle at 60px 4px, transparent 3.5px, var(--bg-paper) 3.5px),
-    radial-gradient(circle at 100px 4px, transparent 3.5px, var(--bg-paper) 3.5px),
-    radial-gradient(circle at 140px 4px, transparent 3.5px, var(--bg-paper) 3.5px),
-    radial-gradient(circle at 180px 4px, transparent 3.5px, var(--bg-paper) 3.5px),
-    radial-gradient(circle at 220px 4px, transparent 3.5px, var(--bg-paper) 3.5px),
-    radial-gradient(circle at 260px 4px, transparent 3.5px, var(--bg-paper) 3.5px),
-    radial-gradient(circle at 300px 4px, transparent 3.5px, var(--bg-paper) 3.5px),
-    radial-gradient(circle at 340px 4px, transparent 3.5px, var(--bg-paper) 3.5px);
-  pointer-events: none;
+  top: -26px; right: -26px;
+  width: 92px; height: 92px;
+  border: 2px dashed var(--accent);
+  border-radius: 50%;
+  opacity: 0.1;
+}
+/* 底部朱红短线 */
+.asset-hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 45%; height: 3px;
+  background: var(--accent);
+  opacity: 0.35;
+  border-radius: 0 3px 0 0;
 }
 
-.asset-library:hover {
-  box-shadow: var(--shadow-md);
-  border-color: var(--border-strong);
-}
-
-.asset-stat {
-  text-align: center;
-  flex: 1;
+.hero-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   position: relative;
   z-index: 1;
 }
 
-.asset-stat .stat-num {
-  font-size: 22px;
+.hero-label {
+  font-size: 9px;
+  color: var(--ink-tertiary);
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  margin-bottom: 3px;
+}
+
+.hero-num {
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--accent);
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.hero-badge {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(139, 58, 58, 0.08);
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(139, 58, 58, 0.15);
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.hero-avatars {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-avatar {
+  width: 24px; height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  background: var(--bg-paper);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.hero-more {
+  font-size: 9px;
+  color: var(--ink-tertiary);
+  font-weight: 600;
+  margin-left: 3px;
+}
+
+/* 侧栏小卡 */
+.asset-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.asset-mini {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.asset-mini:active { transform: scale(0.985); }
+.asset-mini:hover { box-shadow: var(--shadow-md); border-color: var(--border-strong); }
+
+.mini-icon {
+  width: 30px; height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  background: var(--bg-paper);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.mini-body { display: flex; flex-direction: column; }
+
+.mini-num {
+  font-size: 20px;
   font-weight: 700;
   color: var(--ink);
   font-family: Georgia, "Times New Roman", serif;
-  line-height: 1.2;
+  line-height: 1;
 }
 
-.asset-stat:hover .stat-num {
-  color: var(--accent);
-}
-
-.asset-stat .stat-label {
-  font-size: 10px;
+.mini-label {
+  font-size: 9px;
   color: var(--ink-tertiary);
   font-weight: 500;
-}
-
-.asset-divider {
-  width: 1px;
-  height: 30px;
-  background: var(--border);
-  flex-shrink: 0;
+  margin-top: 3px;
 }
 
 /* ---------- 信笺抬头 ---------- */
@@ -5572,16 +5667,15 @@ body {
 .reminder-card:nth-child(4) { animation-delay: 0.24s; }
 .reminder-card:nth-child(5) { animation-delay: 0.30s; }
 
-/* 资产库卡片 — 轻飘 */
-.asset-library {
-  animation: paperFloat 8s ease-in-out infinite;
+/* 资产库卡片 — 轻飘 + 错峰入场 */
+.asset-library .asset-hero {
+  animation: cardStaggerIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
 }
-.asset-library .asset-item {
+.asset-library .asset-mini {
   animation: cardStaggerIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
-.asset-library .asset-item:nth-child(1) { animation-delay: 0.1s; }
-.asset-library .asset-item:nth-child(2) { animation-delay: 0.2s; }
-.asset-library .asset-item:nth-child(3) { animation-delay: 0.3s; }
+.asset-library .asset-mini:nth-child(1) { animation-delay: 0.2s; }
+.asset-library .asset-mini:nth-child(2) { animation-delay: 0.3s; }
 
 /* 快讯横幅 — 信封滑入 */
 .headline-banner {
@@ -8870,19 +8964,37 @@ body::-webkit-scrollbar-thumb:hover { background: var(--ink-cinnabar); }
 
           <!-- 资产库 -->
           <div class="asset-library" id="assetLibrary">
-            <div class="asset-stat">
-              <div class="stat-num" id="statTotalPlants">12</div>
-              <div class="stat-label">总植物数</div>
+            <div class="asset-hero">
+              <div class="hero-top">
+                <div>
+                  <div class="hero-label">总植物数</div>
+                  <div class="hero-num" id="statTotalPlants">18</div>
+                </div>
+                <div class="hero-badge">本月 +2</div>
+              </div>
+              <div class="hero-avatars">
+                <span class="hero-avatar">🌿</span>
+                <span class="hero-avatar">🌺</span>
+                <span class="hero-avatar">🪴</span>
+                <span class="hero-avatar">🍂</span>
+                <span class="hero-more">+14</span>
+              </div>
             </div>
-            <div class="asset-divider"></div>
-            <div class="asset-stat">
-              <div class="stat-num" id="statVarieties">8</div>
-              <div class="stat-label">植物品种</div>
-            </div>
-            <div class="asset-divider"></div>
-            <div class="asset-stat">
-              <div class="stat-num" id="statPhotos">47</div>
-              <div class="stat-label">记录照片</div>
+            <div class="asset-side">
+              <div class="asset-mini">
+                <div class="mini-icon">🏷️</div>
+                <div class="mini-body">
+                  <div class="mini-num" id="statVarieties">8</div>
+                  <div class="mini-label">植物品种</div>
+                </div>
+              </div>
+              <div class="asset-mini">
+                <div class="mini-icon">📷</div>
+                <div class="mini-body">
+                  <div class="mini-num" id="statPhotos">47</div>
+                  <div class="mini-label">记录照片</div>
+                </div>
+              </div>
             </div>
           </div>
 
