@@ -43,6 +43,7 @@
   --enclosed: #5DADE2;
   --outdoor: #E8A838;
   --mount: #8D6E63;
+  --observe: #5B8C5A;
   --new-plant: #8B7355;
   --shadow-sm: 0 2px 8px rgba(61,43,31,0.06);
   --shadow-md: 0 4px 16px rgba(61,43,31,0.08);
@@ -991,6 +992,7 @@ body {
 .tag-enclosed { background: rgba(122,154,122,0.1); color: var(--sage); }
 .tag-outdoor { background: rgba(139,58,58,0.1); color: var(--accent); }
 .tag-mount { background: rgba(139,115,85,0.1); color: var(--ink-secondary); }
+.tag-observe { background: rgba(91,140,90,0.12); color: var(--observe); }
 
 /* ---------- 植物进度条 ---------- */
 .plant-progress {
@@ -1654,6 +1656,7 @@ body {
 .dot-enclosed   { background: var(--enclosed); }
 .dot-outdoor    { background: var(--outdoor); }
 .dot-mount      { background: var(--mount); }
+.dot-observe    { background: var(--observe); }
 
 /* 日期下方彩色横条标记 */
 .day-bar {
@@ -4900,6 +4903,233 @@ body {
   letter-spacing: 1px;
   padding: 0 4px;
   margin-bottom: 6px;
+}
+
+/* ---------- 批量照片记录 ---------- */
+.record-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.record-tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-tertiary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.25s ease;
+}
+.record-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.record-tab:active { transform: scale(0.97); }
+
+/* 上传区 */
+.batch-upload-zone {
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 20px 16px;
+  text-align: center;
+  background: var(--bg-card);
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.batch-upload-zone:active { transform: scale(0.98); }
+.batch-upload-zone.dragover {
+  border-color: var(--accent);
+  background: rgba(139, 58, 58, 0.04);
+}
+.batch-upload-icon { font-size: 28px; margin-bottom: 6px; }
+.batch-upload-title { font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+.batch-upload-sub { font-size: 10px; color: var(--ink-tertiary); }
+
+/* 照片条 */
+.batch-photo-strip-wrap {
+  margin-bottom: 14px;
+}
+.batch-photo-strip-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink-secondary);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.batch-photo-strip-label .strip-count {
+  color: var(--accent);
+  font-size: 11px;
+}
+.batch-photo-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 2px 8px;
+  min-height: 80px;
+  -webkit-overflow-scrolling: touch;
+}
+.batch-photo-strip::-webkit-scrollbar { height: 3px; }
+.batch-photo-strip::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+.batch-photo-item {
+  position: relative;
+  width: 64px; height: 64px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 2px solid var(--border);
+  cursor: grab;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(61,43,31,0.08);
+}
+.batch-photo-item img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+.batch-photo-item:active { cursor: grabbing; transform: scale(0.92); }
+.batch-photo-item.dragging { opacity: 0.4; transform: scale(0.85); }
+.batch-photo-item .photo-remove {
+  position: absolute;
+  top: 2px; right: 2px;
+  width: 16px; height: 16px;
+  background: rgba(61,43,31,0.6);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.batch-photo-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 64px;
+  font-size: 10px;
+  color: var(--ink-tertiary);
+  font-style: italic;
+}
+
+/* 植物花架（拖放目标） */
+.batch-shelf-section {
+  margin-top: 4px;
+}
+.batch-shelf-hint {
+  font-size: 10px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.batch-plant-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-start;
+}
+.batch-plant-drop {
+  width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 4px 6px;
+  border-radius: var(--radius-sm);
+  border: 2px dashed transparent;
+  background: transparent;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+.batch-plant-drop.drop-active {
+  border-color: var(--accent);
+  background: rgba(139, 58, 58, 0.06);
+  transform: scale(1.08);
+}
+.batch-plant-drop.drop-success {
+  animation: dropPulse 0.5s ease;
+}
+@keyframes dropPulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.15); background: rgba(91, 140, 90, 0.15); }
+  100% { transform: scale(1); }
+}
+.batch-plant-badge {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  border: 2px solid var(--border);
+  background: var(--bg-card);
+  overflow: hidden;
+  margin-bottom: 4px;
+  position: relative;
+}
+.batch-plant-badge img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.batch-plant-badge .batch-count {
+  position: absolute;
+  bottom: -2px; right: -2px;
+  min-width: 16px; height: 16px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--bg-card);
+  padding: 0 3px;
+}
+.batch-plant-name {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: center;
+  max-width: 68px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 批量记录反馈 toast */
+.batch-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--ink);
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 9999;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(61,43,31,0.25);
+}
+.batch-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 /* 自定义模式 */
@@ -9206,10 +9436,16 @@ body::-webkit-scrollbar-thumb:hover { background: var(--ink-cinnabar); }
           <span>7月8日 · 周三</span>
         </div>
         <div class="screen-content">
-          <div class="screen-title">登记新植物</div>
-          <div class="screen-subtitle">把新成员加入花园</div>
-          <div class="postmark-v2" style="margin-bottom: 12px;">迎新站 · 07.08</div>
+          <div class="screen-title">记录</div>
+          <div class="screen-subtitle">登记新植物 · 或批量记录照片</div>
+          <div class="postmark-v2" style="margin-bottom: 12px;">记录站 · 07.08</div>
 
+          <div class="record-tabs">
+            <div class="record-tab active" id="tabNewPlant" onclick="switchRecordTab('new-plant')">🌱 登记新植物</div>
+            <div class="record-tab" id="tabBatch" onclick="switchRecordTab('batch')">📸 批量记录</div>
+          </div>
+
+          <div id="recordTabNewPlant">
           <div class="photo-step-card" id="photoStepCard">
             <div class="photo-step-illust">📷</div>
             <div class="photo-step-title">第一步：先给植物拍张照</div>
@@ -9316,6 +9552,31 @@ body::-webkit-scrollbar-thumb:hover { background: var(--ink-cinnabar); }
 
             <button class="btn-primary" id="addRecordSaveBtn" style="margin-top:16px;">保存并加入花园</button>
           </div>
+          </div><!-- /recordTabNewPlant -->
+
+          <!-- 批量记录 Tab -->
+          <div id="recordTabBatch" style="display:none;">
+            <div class="batch-upload-zone" id="batchUploadZone" onclick="document.getElementById('batchFileInput').click()">
+              <div class="batch-upload-icon">📸</div>
+              <div class="batch-upload-title">上传植物照片</div>
+              <div class="batch-upload-sub">不限数量 · 可多选</div>
+            </div>
+            <input type="file" id="batchFileInput" accept="image/*" multiple style="display:none" onchange="handleBatchPhotos(this)">
+
+            <div class="batch-photo-strip-wrap">
+              <div class="batch-photo-strip-label">
+                📮 待分配照片 <span class="strip-count" id="batchPhotoCount">0</span> 张
+              </div>
+              <div class="batch-photo-strip" id="batchPhotoStrip">
+                <div class="batch-photo-empty">上传照片后，拖拽到下方对应植物</div>
+              </div>
+            </div>
+
+            <div class="batch-shelf-section">
+              <div class="batch-shelf-hint">👇 拖拽照片到对应植物完成记录</div>
+              <div class="batch-plant-grid" id="batchPlantGrid"></div>
+            </div>
+          </div><!-- /recordTabBatch -->
         </div>
         <div class="bottom-nav">
   <a href="#" class="nav-item"><span class="nav-icon">📋</span><span>今日</span></a>
@@ -10154,12 +10415,12 @@ body::-webkit-scrollbar-thumb:hover { background: var(--ink-cinnabar); }
       25: [{type:'plant',plant:'彩叶芋',note:'新购入·￥45'},{type:'merge',plant:'龟背竹大叶',note:'与龟背竹B合盆'}],
       28: [{type:'water',plant:'龟背竹大叶',note:'100ml'}],
     };
-    const typeDot = { water:'dot-water', plant:'dot-plant', repot:'dot-repot', pest:'dot-pest', death:'dot-death', fertilize:'dot-fertilize', divide:'dot-divide', merge:'dot-merge', enclosed:'dot-enclosed', outdoor:'dot-outdoor', mount:'dot-mount' };
-    const typeColorVar = { water:'--water', plant:'--plant', repot:'--repot', pest:'--pest', death:'--death', fertilize:'--fertilize', divide:'--divide', merge:'--merge', enclosed:'--enclosed', outdoor:'--outdoor', mount:'--mount' };
-    const typeLabel = { water:'浇水', plant:'新买', repot:'换盆', pest:'杀虫', death:'死亡', fertilize:'施肥', divide:'分苗', merge:'合盆', enclosed:'闷养', outdoor:'露养', mount:'上板' };
-    const typeLabelEN = { water:'浇水', plant:'新买', repot:'换盆', pest:'杀虫', death:'死亡', fertilize:'施肥', divide:'分苗', merge:'合盆', enclosed:'闷养', outdoor:'露养', mount:'上板' };
-    const typeEmoji = { water:'💧', plant:'🌱', repot:'🪴', pest:'🐛', death:'💀', fertilize:'🌿', divide:'✂️', merge:'🧩', enclosed:'🏠', outdoor:'☀️', mount:'🪵' };
-    const typeTag = { water:'tag-water', plant:'tag-plant', repot:'tag-repot', pest:'tag-pest', death:'tag-death', fertilize:'tag-fertilize', divide:'tag-divide', merge:'tag-merge', enclosed:'tag-enclosed', outdoor:'tag-outdoor', mount:'tag-mount' };
+    const typeDot = { water:'dot-water', plant:'dot-plant', repot:'dot-repot', pest:'dot-pest', death:'dot-death', fertilize:'dot-fertilize', divide:'dot-divide', merge:'dot-merge', enclosed:'dot-enclosed', outdoor:'dot-outdoor', mount:'dot-mount', observe:'dot-observe' };
+    const typeColorVar = { water:'--water', plant:'--plant', repot:'--repot', pest:'--pest', death:'--death', fertilize:'--fertilize', divide:'--divide', merge:'--merge', enclosed:'--enclosed', outdoor:'--outdoor', mount:'--mount', observe:'--observe' };
+    const typeLabel = { water:'浇水', plant:'新买', repot:'换盆', pest:'杀虫', death:'死亡', fertilize:'施肥', divide:'分苗', merge:'合盆', enclosed:'闷养', outdoor:'露养', mount:'上板', observe:'观察' };
+    const typeLabelEN = { water:'浇水', plant:'新买', repot:'换盆', pest:'杀虫', death:'死亡', fertilize:'施肥', divide:'分苗', merge:'合盆', enclosed:'闷养', outdoor:'露养', mount:'上板', observe:'观察' };
+    const typeEmoji = { water:'💧', plant:'🌱', repot:'🪴', pest:'🐛', death:'💀', fertilize:'🌿', divide:'✂️', merge:'🧩', enclosed:'🏠', outdoor:'☀️', mount:'🪵', observe:'📸' };
+    const typeTag = { water:'tag-water', plant:'tag-plant', repot:'tag-repot', pest:'tag-pest', death:'tag-death', fertilize:'tag-fertilize', divide:'tag-divide', merge:'tag-merge', enclosed:'tag-enclosed', outdoor:'tag-outdoor', mount:'tag-mount', observe:'tag-observe' };
     let selected = 8;
 
     // 按植物名查找 plantsData（支持模糊匹配，延迟访问避免 TDZ）
@@ -12150,7 +12411,205 @@ body::-webkit-scrollbar-thumb:hover { background: var(--ink-cinnabar); }
         clearNewPlantForm();
         if (noteArea) noteArea.value = '';
         if (feedback) feedback.className = 'save-feedback';
+        // 重置批量照片
+        batchPhotos = [];
+        batchAssignments = {};
+        renderBatchPhotoStrip();
+        renderBatchPlantGrid();
+        // 默认切回新植物 tab
+        switchRecordTab('new-plant');
       };
+
+      // ========== 批量照片记录 ==========
+      let batchPhotos = [];      // 待分配的照片 dataURL 数组
+      let batchAssignments = {}; // { plantIndex: [photoDataURL, ...] }
+      // 调试接口
+      window._addBatchPhotoForTest = function(dataUrl) {
+        batchPhotos.push(dataUrl);
+        renderBatchPhotoStrip();
+      };
+      window._getBatchState = function() {
+        return { photos: batchPhotos.length, assignments: Object.keys(batchAssignments).length };
+      };
+
+      window.switchRecordTab = function(tab) {
+        const tabNewPlant = document.getElementById('tabNewPlant');
+        const tabBatch = document.getElementById('tabBatch');
+        const panelNew = document.getElementById('recordTabNewPlant');
+        const panelBatch = document.getElementById('recordTabBatch');
+        if (!panelNew || !panelBatch) return;
+        if (tab === 'batch') {
+          if (tabNewPlant) tabNewPlant.classList.remove('active');
+          if (tabBatch) tabBatch.classList.add('active');
+          panelNew.style.display = 'none';
+          panelBatch.style.display = 'block';
+          renderBatchPlantGrid();
+        } else {
+          if (tabBatch) tabBatch.classList.remove('active');
+          if (tabNewPlant) tabNewPlant.classList.add('active');
+          panelBatch.style.display = 'none';
+          panelNew.style.display = 'block';
+        }
+      };
+
+      window.handleBatchPhotos = function(input) {
+        if (!input || !input.files) return;
+        Array.from(input.files).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            batchPhotos.push(e.target.result);
+            renderBatchPhotoStrip();
+          };
+          reader.readAsDataURL(file);
+        });
+        input.value = '';
+      };
+
+      window.removeBatchPhoto = function(idx, e) {
+        if (e) e.stopPropagation();
+        batchPhotos.splice(idx, 1);
+        renderBatchPhotoStrip();
+      };
+
+      function renderBatchPhotoStrip() {
+        const strip = document.getElementById('batchPhotoStrip');
+        const countEl = document.getElementById('batchPhotoCount');
+        if (!strip) return;
+        if (countEl) countEl.textContent = batchPhotos.length;
+        if (batchPhotos.length === 0) {
+          strip.innerHTML = '<div class="batch-photo-empty">上传照片后，拖拽到下方对应植物</div>';
+          return;
+        }
+        strip.innerHTML = batchPhotos.map((src, i) => 
+          '<div class="batch-photo-item" draggable="true" data-photo-idx="' + i + '" ondragstart="onBatchDragStart(event,' + i + ')" ondragend="onBatchDragEnd(event)">' +
+            '<img src="' + src + '">' +
+            '<div class="photo-remove" onclick="removeBatchPhoto(' + i + ',event)">×</div>' +
+          '</div>'
+        ).join('');
+      }
+
+      function renderBatchPlantGrid() {
+        const grid = document.getElementById('batchPlantGrid');
+        if (!grid) return;
+        grid.innerHTML = plantsData.map((p, idx) => {
+          const count = batchAssignments[idx] ? batchAssignments[idx].length : 0;
+          return '<div class="batch-plant-drop" data-plant-idx="' + idx + '"' +
+            ' ondragover="onBatchDragOver(event)" ondragleave="onBatchDragLeave(event)" ondrop="onBatchDrop(event,' + idx + ')">' +
+            '<div class="batch-plant-badge" style="border-color:' + (p.color || '#5B8C5A') + '50;">' +
+              (p.photo ? '<img src="' + p.photo + '">' : (p.emoji || '🌿')) +
+              (count > 0 ? '<div class="batch-count">' + count + '</div>' : '') +
+            '</div>' +
+            '<div class="batch-plant-name">' + p.name + '</div>' +
+          '</div>';
+        }).join('');
+      }
+
+      window.onBatchDragStart = function(e, idx) {
+        e.dataTransfer.setData('text/plain', idx);
+        e.dataTransfer.effectAllowed = 'move';
+        const item = e.currentTarget;
+        setTimeout(function() { item.classList.add('dragging'); }, 0);
+      };
+
+      window.onBatchDragEnd = function(e) {
+        e.currentTarget.classList.remove('dragging');
+        document.querySelectorAll('.batch-plant-drop.drop-active').forEach(function(el) {
+          el.classList.remove('drop-active');
+        });
+      };
+
+      window.onBatchDragOver = function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        e.currentTarget.classList.add('drop-active');
+      };
+
+      window.onBatchDragLeave = function(e) {
+        e.currentTarget.classList.remove('drop-active');
+      };
+
+      window.onBatchDrop = function(e, plantIdx) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('drop-active');
+        const photoIdx = parseInt(e.dataTransfer.getData('text/plain'));
+        if (isNaN(photoIdx) || !batchPhotos[photoIdx]) return;
+
+        const p = plantsData[plantIdx];
+        if (!p) return;
+        var photoSrc = batchPhotos[photoIdx];
+
+        // 记录到事件
+        var today = new Date().getDate();
+        if (!events[today]) events[today] = [];
+        events[today].push({
+          type: 'observe',
+          plant: p.name,
+          note: '批量照片记录',
+          photo: photoSrc
+        });
+
+        // 记录到分配
+        if (!batchAssignments[plantIdx]) batchAssignments[plantIdx] = [];
+        batchAssignments[plantIdx].push(photoSrc);
+
+        // 从待分配列表移除
+        batchPhotos.splice(photoIdx, 1);
+
+        // 刷新
+        renderBatchPhotoStrip();
+        renderBatchPlantGrid();
+
+        // 成功动画
+        e.currentTarget.classList.add('drop-success');
+        setTimeout(function() { e.currentTarget.classList.remove('drop-success'); }, 500);
+
+        // 同步其他页面
+        updateAssetLibrary();
+
+        // toast 反馈
+        showBatchToast('✓ ' + p.name + ' 已记录 1 张照片');
+      };
+
+      function showBatchToast(msg) {
+        var existing = document.querySelector('.batch-toast');
+        if (existing) existing.remove();
+        var toast = document.createElement('div');
+        toast.className = 'batch-toast';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(function() { toast.classList.add('show'); }, 10);
+        setTimeout(function() {
+          toast.classList.remove('show');
+          setTimeout(function() { if (toast.parentNode) toast.remove(); }, 300);
+        }, 2000);
+      }
+
+      // 拖放上传区支持
+      var _batchZone = document.getElementById('batchUploadZone');
+      if (_batchZone) {
+        _batchZone.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          _batchZone.classList.add('dragover');
+        });
+        _batchZone.addEventListener('dragleave', function() {
+          _batchZone.classList.remove('dragover');
+        });
+        _batchZone.addEventListener('drop', function(e) {
+          e.preventDefault();
+          _batchZone.classList.remove('dragover');
+          if (e.dataTransfer.files) {
+            Array.from(e.dataTransfer.files).forEach(function(file) {
+              if (!file.type.startsWith('image/')) return;
+              var reader = new FileReader();
+              reader.onload = function(ev) {
+                batchPhotos.push(ev.target.result);
+                renderBatchPhotoStrip();
+              };
+              reader.readAsDataURL(file);
+            });
+          }
+        });
+      }
 
       // 保存按钮
       if (saveBtn) {
