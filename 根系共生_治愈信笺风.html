@@ -836,7 +836,7 @@ body {
   text-align: center;
   position: relative;
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .headline-banner::before {
@@ -6584,7 +6584,10 @@ body {
   font-style: italic;
   letter-spacing: 4px;
   color: var(--accent);
-  position: absolute;
+  height: auto;
+  line-height: 16px;
+  white-space: nowrap;
+  z-index: 2;
 }
 .headline-banner::after {
   content: "";
